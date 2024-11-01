@@ -20,7 +20,7 @@ Route::get('/login', function () {
 })->name('auth.login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->name('auth.login.post');
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/home', [OrderController::class, 'index'])->name('home');
+    Route::get('/', [OrderController::class, 'index'])->name('home');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::post('order/add', [OrderController::class, 'store'])->name('order.store');

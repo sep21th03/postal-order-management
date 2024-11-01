@@ -63,4 +63,25 @@
                 }
             });
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('searchInput');
+        const orderTableBody = document.getElementById('order-table-body');
+        const rows = orderTableBody.getElementsByTagName('tr');
+
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            for (let row of rows) {
+                const cells = row.getElementsByTagName('td');
+                let isMatch = false;
+                for (let cell of cells) {
+                    if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                        isMatch = true;
+                        break;
+                    }
+                }
+                row.style.display = isMatch ? '' : 'none';
+            }
+        });
+    });
 </script>

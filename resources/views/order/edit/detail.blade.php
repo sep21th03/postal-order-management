@@ -3,6 +3,11 @@
 Chi tiết đơn hàng
 @endsection
 @section('content')
+<style>
+    .toast-message {
+        color: black !important;
+    }
+</style>
 <div class="content">
     <div class="mb-9">
         <h2 class="mb-5">Chi tiết đơn hàng<span> #{{ $order['tracking_number'] }}</span></h2>
@@ -76,6 +81,8 @@ Chi tiết đơn hàng
                                     @endif
                                     {{ isset($addressParts[3]) ? trim($addressParts[3]) : '' }}
                                 </p>
+                                @else
+                                <p class="text-body-secondary mb-0 fs-9">{{ $order['sender_address'] }}</p>
                                 @endif
                             </div>
                             <div class="col-6 col-sm-12">
@@ -115,6 +122,8 @@ Chi tiết đơn hàng
                                     @endif
                                     {{ isset($addressParts[3]) ? trim($addressParts[3]) : '' }}
                                 </p>
+                                @else
+                                <p class="text-body-secondary mb-0 fs-9">{{ $order['recipient_address'] }}</p>
                                 @endif
                             </div>
                             <div class="col-6 col-sm-12">

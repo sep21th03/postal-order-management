@@ -8,18 +8,28 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ParcelType;
 use App\Jobs\UpdateOrderStatusJob;
-
+use Carbon\Carbon;
 class OrderController extends Controller
 {
     public function index()
     {
         if (Auth::user()) {
+            Carbon::setLocale('vi');
             $orders = Order::with(['user', 'parcelTypes'])->orderBy('created_at', 'desc')->get();
-
+            $paymentStatuses = [
+                ['id' => 'paid', 'name' => 'Đã thanh toán'],
+                ['id' => 'cash_on_delivery', 'name' => 'Thanh toán khi nhận hàng'],
+            ];
+            $shippingStatus = [
+                ['id' => 'standard', 'name' => 'Giao hàng tiêu chuẩn'],
+                ['id' => 'express', 'name' => 'Giao hàng hỏa tốc'],
+            ];
             return view('order.index.list', [
                 'total_order' => Order::count(),
                 'orders' => $orders,
                 'parcelTypes' => ParcelType::all(),
+                'paymentStatuses' => $paymentStatuses,
+                'shippingStatus' => $shippingStatus,
             ]);
         }
         return redirect()->route('auth.login');
@@ -43,7 +53,7 @@ class OrderController extends Controller
                 'recipient_name' => 'required|string|max:255',
                 'recipient_address' => 'required|string|max:255',
                 'phone_number_recipient' => 'required|string|max:20',
-                'email_recipient' => 'nullable|string|max:20',
+                'email_recipient' => 'nullable|string|max:100',
                 'note' => 'nullable|string',
                 'parcel_type_id' => 'nullable|exists:parcel_types,id',
                 'value' => 'required|numeric|min:0',
@@ -139,10 +149,10 @@ class OrderController extends Controller
         try {
             $order = Order::findOrFail($request->input('id'));
 
-            if ($order->status !== 'pending') {
+            if ($order->status !== 'pending' && $order->status !== 'cancelled') {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Không thể xóa đơn hàng. Trạng thái của đơn hàng phải là "Chờ Xử Lý".',
+                    'message' => 'Không thể xóa đơn hàng. Trạng thái của đơn hàng phải là "Chờ Xử Lý" hoặc "Đã Hủy".',
                 ], 400);
             }
 
@@ -175,19 +185,19 @@ class OrderController extends Controller
             $content = '';
             switch ($data['status']) {
                 case Order::STATUS_CANCELLED:
-                    $content = "Đơn hàng #{$order->code} của bạn đã bị hủy bỏ";
+                    $content = "Đơn hàng #{$order->tracking_number} của bạn đã bị hủy bỏ";
                     break;
                 case Order::STATUS_PENDING:
-                    $content = "Đơn hàng #{$order->code} của bạn đang chờ xác nhận";
+                    $content = "Đơn hàng #{$order->tracking_number} của bạn đang chờ xác nhận";
                     break;
                 case Order::STATUS_DELIVERED:
-                    $content = "Đơn hàng #{$order->code} của bạn đã được giao thành công";
+                    $content = "Đơn hàng #{$order->tracking_number} của bạn đã được giao thành công";
                     break;
                 case Order::STATUS_PROCESSING:
-                    $content = "Đơn hàng #{$order->code} đã được xác nhận và sẽ sớm được giao tới bạn";
+                    $content = "Đơn hàng #{$order->tracking_number} đã được xác nhận và sẽ sớm được giao tới bạn";
                     break;
                 case Order::STATUS_IN_TRANSIT:
-                    $content = "Đơn hàng #{$order->code} đang trên đường giao tới bạn";
+                    $content = "Đơn hàng #{$order->tracking_number} đang trên đường giao tới bạn";
                     break;
                 default:
                     break;
@@ -197,7 +207,7 @@ class OrderController extends Controller
                 dispatch(new UpdateOrderStatusJob($order->email_recipient, $order->recipient_name, $content));
             }
         }
-
+    
         $order->update($data);
 
         return response()->json(['status' => 'success', 'message' => 'Cập nhật đơn hàng thành công']);

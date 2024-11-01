@@ -62,7 +62,8 @@ Danh sách đơn hàng
                 <div class="row g-3 justify-content-between">
                     <div class="col-auto">
                         <div class="search-box">
-                            <form class="position-relative" id="searchForm"><input id="searchInput" class="form-control search-input search" type="search" placeholder="Tìm kiếm" aria-label="Search" />
+                            <form class="position-relative" id="searchForm">
+                                <input id="searchInput" class="form-control search-input search" type="search" placeholder="Tìm kiếm" aria-label="Search" />
                                 <span class="fas fa-search search-box-icon"></span>
                             </form>
                         </div>
@@ -90,7 +91,7 @@ Danh sách đơn hàng
                             @forelse ($orders as $order)
                             <tr class="hover-actions-trigger btn-reveal-trigger position-static">
                                 <td class="fs-8 align-middle text-center px-0 py-3">{{ $loop->iteration }}</td>
-                                <td class="fs-9 order align-middle text-center white-space-nowrap py-0">
+                                <td class="fs-9 order align-middle text-start white-space-nowrap py-0">
                                     <a class="fw-semibold" href="{">
                                         {{ $order->tracking_number }}
                                     </a>
@@ -104,7 +105,7 @@ Danh sách đơn hàng
                                 <td class="delivery_type align-middle white-space-nowrap text-body fs-8 text-start">
                                     {{ $order->phone_number }}
                                 </td>
-                                <td class="item align-middle white-space-nowrap text-center">
+                                <td class="item align-middle white-space-nowrap text-start">
                                     @foreach($order->parcelTypes as $parcelType)
                                     {{ $parcelType->name }}{{ !$loop->last ? ', ' : '' }}
                                     @endforeach
@@ -126,9 +127,7 @@ Danh sách đơn hàng
                                     </span>
                                 </td>
                                 <td class="date align-middle white-space-nowrap text-body-tertiary fs-8 ps-4 text-start">
-                                    <script>
-                                        document.write(formatTimeAgo("{{ $order['created_at'] }}"));
-                                    </script>
+                                    {{ \Carbon\Carbon::parse($order['created_at'])->diffForHumans() }}
                                 </td>
                                 <td class="date align-middle white-space-nowrap text-body-tertiary fs-8 ps-4 text-center">
                                     <div class="btn-reveal-trigger position-relative">
@@ -136,7 +135,7 @@ Danh sách đơn hàng
                                             <span class="fas fa-ellipsis-h fs-8"></span>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-end py-2">
-                                        <a class="dropdown-item" href="{{ route('order.show', ['id' => $order['id']]) }}">Xem chi tiết</a>
+                                            <a class="dropdown-item" href="{{ route('order.show', ['id' => $order['id']]) }}">Xem chi tiết</a>
                                             <a class="dropdown-item text-danger" onclick="delete_order({{ $order['id'] }})" href="#!">Xóa</a>
                                         </div>
                                     </div>
@@ -151,14 +150,6 @@ Danh sách đơn hàng
                             @endforelse
                         </tbody>
                     </table>
-                </div>
-                <div class="row align-items-center justify-content-between py-2 pe-0 fs-8">
-                    <div class="col-auto d-flex">
-                        <p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p><a class="fw-semibold" href="#!" data-list-view="*">View all<span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a><a class="fw-semibold d-none" href="#!" data-list-view="less">View Less<span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
-                    </div>
-                    <div class="col-auto d-flex"><button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button>
-                        <ul class="mb-0 pagination"></ul><button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button>
-                    </div>
                 </div>
             </div>
         </div>

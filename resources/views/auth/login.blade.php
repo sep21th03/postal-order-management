@@ -79,7 +79,7 @@
                           timer: 3000,
                           showConfirmButton: false,
                       });
-                      window.location.href = '/home';
+                      window.location.href = '/';
                   } else {
                     Swal.fire({
                           icon: "error",
